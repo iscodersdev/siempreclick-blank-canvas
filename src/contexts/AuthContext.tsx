@@ -1,10 +1,23 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
   name: string;
   email: string;
+  UAT?: string; // Adding UAT field which appears in the Flutter app
+}
+
+interface LoginResponse {
+  Status: number;
+  Mensaje?: string;
+  Usuario?: {
+    Id: string;
+    Nombre: string;
+    Email: string;
+    UAT: string;
+  };
 }
 
 interface AuthContextType {
@@ -43,20 +56,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      // This would be replaced with an actual API call
-      // const response = await loginAPI(email, password);
       
-      // For now, simulate a successful login
-      const userData: User = {
-        id: "1",
-        name: "Usuario Demo",
-        email: email,
-      };
+      // Based on LoginApi.dart, we need to make a POST request to the login endpoint
+      const response = await fetch("http://portalsmartclick.com.ar/api/musuario/login20", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Mail: email,
+          Password: password,
+          EmpresaId: 1
+        }),
+      });
+
+      const data: LoginResponse = await response.json();
       
-      localStorage.setItem("user", JSON.stringify(userData));
-      setUser(userData);
+      if (data.Status === 200 && data.Usuario) {
+        // Login successful
+        const userData: User = {
+          id: data.Usuario.Id,
+          name: data.Usuario.Nombre,
+          email: data.Usuario.Email,
+          UAT: data.Usuario.UAT,
+        };
+        
+        localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+      } else {
+        // Login failed
+        toast.error(data.Mensaje || "Error al iniciar sesión");
+        throw new Error(data.Mensaje || "Error al iniciar sesión");
+      }
     } catch (error) {
       console.error("Login error:", error);
+      toast.error("No se pudo conectar con el servidor");
       throw error;
     } finally {
       setLoading(false);
