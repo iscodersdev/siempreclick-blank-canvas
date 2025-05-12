@@ -2,18 +2,27 @@
 import { MovimientosModel } from "../models/MovimientosModel";
 import { ProveedoresModel, ProductosModel } from "../models/ProveedoresModel";
 
-// Use the base URL from the Flutter config
-const API_URL = "http://portalsmartclick.com.ar"; 
+// Update to HTTPS for secure connection
+const API_URL = "https://portalsmartclick.com.ar"; 
 
-// Helper function for API requests
+// Helper function for API requests with improved error handling
 const fetchAPI = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   try {
+    const headers = {
+      "Content-Type": "application/json",
+      // Add other headers from the Flutter app
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+      'Access-Control-Expose-Headers': 'Access-Control-*',
+      'Access-Control-Allow-Headers': 'Access-Control-*, Origin, X-Requested-With, Content-Type, Accept',
+      ...options.headers,
+    };
+
+    // First try with a preflight OPTIONS request for CORS
     const response = await fetch(`${API_URL}${endpoint}`, {
-      headers: {
-        "Content-Type": "application/json",
-        // Add auth headers here if needed
-      },
       ...options,
+      headers,
+      mode: 'cors',
     });
     
     if (!response.ok) {

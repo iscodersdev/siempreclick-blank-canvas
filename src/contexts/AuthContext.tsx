@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -57,12 +56,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
-      // Based on LoginApi.dart, we need to make a POST request to the login endpoint
-      const response = await fetch("http://portalsmartclick.com.ar/api/musuario/login20", {
+      // Updated API call with HTTPS and proper CORS handling
+      const response = await fetch("https://portalsmartclick.com.ar/api/musuario/login20", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+          'Access-Control-Expose-Headers': 'Access-Control-*',
+          'Access-Control-Allow-Headers': 'Access-Control-*, Origin, X-Requested-With, Content-Type, Accept'
         },
+        mode: 'cors',
         body: JSON.stringify({
           Mail: email,
           Password: password,
@@ -70,7 +74,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }),
       });
 
+      // Add debugging information
+      console.log("Login response status:", response.status);
+      
       const data: LoginResponse = await response.json();
+      console.log("Login response data:", data);
       
       if (data.Status === 200 && data.Usuario) {
         // Login successful
@@ -90,7 +98,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("No se pudo conectar con el servidor");
+      
+      // More specific error message based on the type of error
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        toast.error("No se pudo conectar con el servidor. Verifique su conexión a Internet o inténtelo más tarde.");
+      } else {
+        toast.error("No se pudo conectar con el servidor");
+      }
+      
       throw error;
     } finally {
       setLoading(false);
