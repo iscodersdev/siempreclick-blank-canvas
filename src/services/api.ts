@@ -1,4 +1,3 @@
-
 import { MovimientosModel } from "../models/MovimientosModel";
 import { ProveedoresModel, ProductosModel } from "../models/ProveedoresModel";
 
@@ -57,10 +56,17 @@ export const register = async (userData: any) => {
 };
 
 export const recuperarContraseña = async (email: string) => {
-  return fetchAPI("/api/musuario/RecuperaPassword", {
+  const response = await fetchAPI("/api/musuario/RecuperaPassword", {
     method: "POST",
     body: JSON.stringify({ eMail: email }),
   });
+  
+  // Match the functionality from MaRecuperarClave in LoginApi.dart
+  if (response.Status !== 200) {
+    throw new Error(response.Mensaje || "Error al recuperar contraseña");
+  }
+  
+  return response;
 };
 
 // Movements API

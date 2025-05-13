@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -80,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data: LoginResponse = await response.json();
       console.log("Login response data:", data);
       
+      // Replicate the Flutter app logic
       if (data.Status === 200 && data.Usuario) {
         // Login successful
         const userData: User = {
@@ -89,8 +91,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           UAT: data.Usuario.UAT,
         };
         
+        // Save user data in local storage (similar to Flutter's secure storage)
         localStorage.setItem("user", JSON.stringify(userData));
+        
+        // Also store route info like the Flutter app does
+        localStorage.setItem("routePrestamos", "0");
+        
         setUser(userData);
+        toast.success(`¡Bienvenido, ${userData.name || 'Usuario'}!`);
       } else {
         // Login failed
         toast.error(data.Mensaje || "Error al iniciar sesión");
