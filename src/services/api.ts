@@ -4,6 +4,12 @@ import { ProveedoresModel, ProductosModel } from "../models/ProveedoresModel";
 // Update to HTTPS for secure connection
 const API_URL = "https://portalsmartclick.com.ar"; 
 
+// Define response interfaces for better type checking
+interface ApiResponse {
+  Status: number;
+  Mensaje?: string;
+}
+
 // Helper function for API requests with improved error handling
 const fetchAPI = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   try {
@@ -55,8 +61,8 @@ export const register = async (userData: any) => {
   });
 };
 
-export const recuperarContraseña = async (email: string) => {
-  const response = await fetchAPI("/api/musuario/RecuperaPassword", {
+export const recuperarContraseña = async (email: string): Promise<ApiResponse> => {
+  const response = await fetchAPI<ApiResponse>("/api/musuario/RecuperaPassword", {
     method: "POST",
     body: JSON.stringify({ eMail: email }),
   });
